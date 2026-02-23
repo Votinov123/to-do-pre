@@ -11,18 +11,24 @@ const listElement = document.querySelector(".to-do__list");
 const formElement = document.querySelector(".to-do__form");
 const inputElement = document.querySelector(".to-do__input");
 
-function loadTasks() {
-	const savedTasks = localStorage.getItem('tasks');
-	if (savedTasks){
-		const parsedTasks = JSON.parse(savedTasks);
-		if (parsedTasks.length > 0){
-			return parsedTasks;
-		}
+const loadTasks = () => {
+	let tasks = localStorage.getItem('tasks');
+	if(!tasks){
+		return items;
+	}
+	tasks = JSON.parse(tasks);
+	if(tasks.length > 0){
+		return tasks;
 	}
 	return items;
 }
 
-function createItem(item) {
+const saveTasksDOM = () => {
+	const items = getTasksFromDOM();
+	saveTasks(items);
+}
+
+const createItem = (item) => {
 	const template = document.getElementById("to-do__item-template");
 	const clone = template.content.querySelector(".to-do__item").cloneNode(true);
   const textElement = clone.querySelector(".to-do__item-text");
@@ -32,50 +38,47 @@ function createItem(item) {
   
   textElement.textContent = item;
 
-  deleteButton.addEventListener("click", function(event){
+  deleteButton.addEventListener("click", (event) => {
 	clone.remove();
-	const items = getTasksFromDOM();
-	saveTasks(items);
+	saveTasksDOM();
   });
 
-  duplicateButton.addEventListener("click", function(event){
+  duplicateButton.addEventListener("click", (event) => {
 	const itemName = textElement.textContent;
 	const newItem = createItem(itemName);
 	listElement.prepend(newItem);
-	const items = getTasksFromDOM();
-	saveTasks(items);
+	saveTasksDOM();
   });
 
-  editButton.addEventListener("click", function(event){
+  editButton.addEventListener("click", (event) => {
 	textElement.setAttribute("contenteditable", "true");
 	textElement.focus();
   });
   
-  textElement.addEventListener("blur", function(event){
+  textElement.addEventListener("blur", (event) => {
 	textElement.setAttribute("contenteditable", "false");
-	const items = getTasksFromDOM();
-	saveTasks(items);
+	saveTasksDOM();
   });
 
   return clone;
 
 }
 
-function getTasksFromDOM() {
+const getTasksFromDOM = () => {
 	const itemsNamesElements = document.querySelectorAll(".to-do__item-text");
 	const tasks = [];
-	itemsNamesElements.forEach(function(itemNameElement){
+	itemsNamesElements.forEach((itemNameElement) => {
 		const taskText = itemNameElement.textContent;
 		tasks.push(taskText);
 	});
 	return tasks;
 }
 
-function saveTasks(tasks) {
+const saveTasks = (tasks) => {
 	localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-formElement.addEventListener("submit", function(event){
+formElement.addEventListener("submit", (event) => {
 	event.preventDefault();
 	const taskText = inputElement.value;
 	if (taskText){
@@ -89,6 +92,6 @@ formElement.addEventListener("submit", function(event){
 
 items = loadTasks();
 
-items.forEach(function(item){
+items.forEach((item)=>{
 	listElement.append(createItem(item));
 });
